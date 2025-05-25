@@ -1,28 +1,30 @@
 package com.example.puppies.controller;
 
+import com.example.puppies.dto.AuthRequest;
+import com.example.puppies.dto.AuthResponse;
+import com.example.puppies.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping(value = "/api/auth", produces = APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthenticationManager authenticationManager;
-    // TODO: Inject JwtTokenProvider or JwtUtils to generate token
+    private final JwtUtils jwtUtils;
 
-    @PostMapping("/login")
-    public ResponseEntity<String> login(
-            @RequestParam String email,
-            @RequestParam String password) {
-        Authentication auth = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(email, password)
+    @PostMapping(value = "/login", consumes = APPLICATION_JSON_VALUE)
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
+        /* Authentication auth = */ authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
-        // String token = jwtTokenProvider.generateToken(auth);
-        String token = "TODO_GENERATE_JWT";
-        return ResponseEntity.ok(token);
+        String token = jwtUtils.generateToken(request.getEmail());
+        return ResponseEntity.ok(new AuthResponse(token));
     }
 }

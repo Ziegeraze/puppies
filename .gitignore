@@ -22,15 +22,5 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
-src/test/java/com/example/.DS_Store
-src/test/java/com/.DS_Store
-src/test/java/.DS_Store
-src/test/.DS_Store
-src/main/resources/.DS_Store
-src/main/java/com/example/puppies/.DS_Store
-src/main/java/com/example/.DS_Store
-src/main/java/com/.DS_Store
-src/main/java/.DS_Store
-src/main/.DS_Store
-src/.DS_Store
-.DS_Store
+**/.DS_Store
+/target

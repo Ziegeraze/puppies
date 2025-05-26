@@ -10,24 +10,51 @@ import com.example.puppies.service.LikeService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class LikeServiceImpl implements LikeService {
     private final LikeRepository likeRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
 
     @Override
+    @Transactional
     public void likePost(Long userId, Long postId) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new EntityNotFoundException("User not found"));
+            .orElseThrow(() -> new EntityNotFoundException("User not found: " + userId));
         Post post = postRepository.findById(postId)
-            .orElseThrow(() -> new EntityNotFoundException("Post not found"));
+            .orElseThrow(() -> new EntityNotFoundException("Post not found: " + postId));
+
+        // Evitamos likes duplicados (por la constraint unique en la tabla)
+        boolean already = likeRepository
+            .findAllByUserId(userId)
+            .stream()
+            .anyMatch(l -> l.getPost().getId().equals(postId));
+        if (already) {
+            return;
+        }
+
         Like like = Like.builder()
             .user(user)
             .post(post)
             .build();
         likeRepository.save(like);
+    }
+
+    @Override
+    public List<Post> getLikedPostsByUser(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new EntityNotFoundException("User not found: " + userId);
+        }
+        return likeRepository.findAllByUserId(userId)
+            .stream()
+            .map(Like::getPost)
+            .collect(Collectors.toList());
     }
 }

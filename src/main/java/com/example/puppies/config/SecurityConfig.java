@@ -31,6 +31,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/users").permitAll() // Allow user creation
                 .requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll() // Swagger/OpenAPI
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/posts").authenticated() // Allow authenticated users to create posts
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/posts/{postId}/likes").authenticated() // Allow authenticated users to like posts
                 .anyRequest().authenticated()

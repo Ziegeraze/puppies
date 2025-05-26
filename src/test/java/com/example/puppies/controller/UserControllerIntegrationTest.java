@@ -133,9 +133,34 @@ class UserControllerIntegrationTest { // Renamed from UserIntegrationTest
     @Test
     void shouldListUserLikedPosts() throws Exception {
         mvc.perform(get("/api/users/" + userId + "/likes")
-                .header("Authorization", "Bearer " + jwtToken)) // Added JWT token for consistency if endpoint becomes secured
+                .header("Authorization", "Bearer " + jwtToken)) // Se añade token JWT por consistencia si el endpoint se asegura
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(1))
             .andExpect(jsonPath("$[0].id").value(postId1));
+    }
+
+    // -----------------------------------
+    // Pruebas de Manejo de Errores
+    // -----------------------------------
+
+    @Test
+    void getNonexistentUser_shouldReturn404() throws Exception {
+        mvc.perform(get("/api/users/9999")
+                .header("Authorization", "Bearer " + jwtToken)) // Se añade token JWT
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getPostsForNonexistentUser_shouldReturn404() throws Exception {
+        mvc.perform(get("/api/users/9999/posts")
+                .header("Authorization", "Bearer " + jwtToken)) // Se añade token JWT
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getLikesForNonexistentUser_shouldReturn404() throws Exception {
+        mvc.perform(get("/api/users/9999/likes")
+                .header("Authorization", "Bearer " + jwtToken)) // Se añade token JWT
+            .andExpect(status().isNotFound());
     }
 }

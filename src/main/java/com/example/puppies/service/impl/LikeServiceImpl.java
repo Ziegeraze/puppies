@@ -48,6 +48,17 @@ public class LikeServiceImpl implements LikeService {
     }
 
     @Override
+    @Transactional
+    public void unlikePost(Long userId, Long postId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("User not found: " + userId));
+        Post post = postRepository.findById(postId)
+            .orElseThrow(() -> new EntityNotFoundException("Post not found: " + postId));
+        
+        likeRepository.deleteByUserAndPost(user, post);
+    }
+
+    @Override
     public List<Post> getLikedPostsByUser(Long userId) {
         if (!userRepository.existsById(userId)) {
             throw new EntityNotFoundException("User not found: " + userId);

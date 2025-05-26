@@ -19,4 +19,13 @@ public class LikeController {
         likeService.likePost(userId, postId);
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping
+    public ResponseEntity<Void> unlikePost(
+        @PathVariable Long postId,
+        @RequestParam Long userId
+    ) {
+        likeService.unlikePost(userId, postId);
+        return ResponseEntity.ok().build();
+    }
 }

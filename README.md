@@ -11,7 +11,7 @@
    cd puppies
    ```
 
-2. **Run the application** (Java 11+)
+2. **Run the application** (Java 17)
 
    ```bash
    mvn spring-boot:run

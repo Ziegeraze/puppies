@@ -7,5 +7,5 @@ import jakarta.validation.constraints.*;
 public class PostRequest {
     @NotNull private Long userId;
     @NotBlank private String imageUrl;
-    private String content;
+    @NotBlank private String content;
 }

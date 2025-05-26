@@ -2,7 +2,6 @@ package com.example.puppies.dto;
 
 import lombok.*;
 import jakarta.validation.constraints.*;
-import java.time.LocalDateTime;
 
 @Data @NoArgsConstructor @AllArgsConstructor @Builder
 public class UserRequest {

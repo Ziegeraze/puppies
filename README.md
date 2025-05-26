@@ -7,8 +7,8 @@
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/your-username/puppies-api.git
-   cd puppies-api
+   git clone https://github.com/Ziegeraze/puppies.git
+   cd puppies
    ```
 
 2. **Run the application** (Java 11+)

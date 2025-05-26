@@ -2,6 +2,7 @@ package com.example.puppies.config;
 
 import org.springframework.context.annotation.*;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -25,15 +26,17 @@ public class SecurityConfig {
             .passwordEncoder(passwordEncoder());
 
         http
-            .csrf().disable()
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
-            .authorizeHttpRequests()
+            .csrf(csrf -> csrf.disable()) // Updated CSRF configuration
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/users").permitAll() // Allow user creation
                 .requestMatchers("/api/auth/**", "/h2-console/**").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/posts").authenticated() // Allow authenticated users to create posts
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/posts/{postId}/likes").authenticated() // Allow authenticated users to like posts
                 .anyRequest().authenticated()
-            .and()
+            )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-            .headers().frameOptions().disable(); // for H2 console
+            .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable())); // for H2 console
 
         return http.build();
     }
@@ -44,10 +47,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authManager(HttpSecurity http, PasswordEncoder passwordEncoder, CustomUserDetailsService uds) throws Exception {
-        return http.getSharedObject(AuthenticationManagerBuilder.class)
-                   .userDetailsService(uds)
-                   .passwordEncoder(passwordEncoder)
-                   .and().build();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 }

@@ -4,6 +4,7 @@ import com.example.puppies.model.Post;
 import com.example.puppies.model.User;
 import com.example.puppies.repository.PostRepository;
 import com.example.puppies.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +16,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PostServiceImpl implements PostService {
-
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
@@ -23,12 +23,12 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public Post createPost(Long userId, String imageUrl, String content) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+            .orElseThrow(() -> new EntityNotFoundException("User not found: " + userId));
         Post post = Post.builder()
-                .user(user)
-                .imageUrl(imageUrl)
-                .content(content)
-                .build();
+            .user(user)
+            .imageUrl(imageUrl)
+            .content(content)
+            .build();
         return postRepository.save(post);
     }
 
@@ -44,6 +44,9 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<Post> getPostsByUser(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new EntityNotFoundException("User not found: " + userId);
+        }
         return postRepository.findAllByUserIdOrderByCreatedAtDesc(userId);
     }
 }

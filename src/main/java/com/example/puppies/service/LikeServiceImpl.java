@@ -6,6 +6,7 @@ import com.example.puppies.model.User;
 import com.example.puppies.repository.LikeRepository;
 import com.example.puppies.repository.PostRepository;
 import com.example.puppies.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +18,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class LikeServiceImpl implements LikeService {
-
     private final LikeRepository likeRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
@@ -26,20 +26,33 @@ public class LikeServiceImpl implements LikeService {
     @Transactional
     public void likePost(Long userId, Long postId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+            .orElseThrow(() -> new EntityNotFoundException("User not found: " + userId));
         Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("Post not found with id: " + postId));
+            .orElseThrow(() -> new EntityNotFoundException("Post not found: " + postId));
+
+        boolean already = likeRepository
+            .findAllByUserId(userId)
+            .stream()
+            .anyMatch(l -> l.getPost().getId().equals(postId));
+        if (already) {
+            return;
+        }
+
         Like like = Like.builder()
-                .user(user)
-                .post(post)
-                .build();
+            .user(user)
+            .post(post)
+            .build();
         likeRepository.save(like);
     }
 
     @Override
     public List<Post> getLikedPostsByUser(Long userId) {
-        return likeRepository.findAllByUserId(userId).stream()
-                .map(Like::getPost)
-                .collect(Collectors.toList());
+        if (!userRepository.existsById(userId)) {
+            throw new EntityNotFoundException("User not found: " + userId);
+        }
+        return likeRepository.findAllByUserId(userId)
+            .stream()
+            .map(Like::getPost)
+            .collect(Collectors.toList());
     }
 }

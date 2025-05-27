@@ -114,7 +114,7 @@ This guide walks you through testing the Puppies API using Postman, including se
         ```
 *   **Postman Tests (JavaScript):**
     ```javascript
-    // In the "Tests" tab for this request
+    // In the "Scripts" tab, under "Post-response" for this request
     if (pm.response.code === 200) {
         const responseBody = pm.response.json();
         pm.collectionVariables.set("USER_1_ID", responseBody.id);
@@ -124,6 +124,14 @@ This guide walks you through testing the Puppies API using Postman, including se
     }
     ```
 *   **Expected Response:** `200 OK` with user details. `USER_1_ID` variable will be populated.
+*   **Expected Database State:**
+    *   **`USERS` table:** A new row is added for Alice.
+        *   `ID`: (e.g., 1, or the value now in `USER_1_ID`)
+        *   `NAME`: "alice"
+        *   `EMAIL`: "alice@example.com"
+        *   `PASSWORD`: (hashed value of "password123")
+    *   **`POSTS` table:** No changes.
+    *   **`LIKES` table:** No changes.
 
 **Step 2: Create User 2 (Bob)**
 
@@ -141,7 +149,7 @@ This guide walks you through testing the Puppies API using Postman, including se
         ```
 *   **Postman Tests (JavaScript):**
     ```javascript
-    // In the "Tests" tab for this request
+    // In the "Scripts" tab, under "Post-response" for this request
     if (pm.response.code === 200) {
         const responseBody = pm.response.json();
         pm.collectionVariables.set("USER_2_ID", responseBody.id);
@@ -151,6 +159,15 @@ This guide walks you through testing the Puppies API using Postman, including se
     }
     ```
 *   **Expected Response:** `200 OK` with user details. `USER_2_ID` variable will be populated.
+*   **Expected Database State:**
+    *   **`USERS` table:** A new row is added for Bob.
+        *   `ID`: (e.g., 2, or the value now in `USER_2_ID`)
+        *   `NAME`: "bob"
+        *   `EMAIL`: "bob@example.com"
+        *   `PASSWORD`: (hashed value of "password456")
+        *   The table now contains two users: Alice and Bob.
+    *   **`POSTS` table:** No changes.
+    *   **`LIKES` table:** No changes.
 
 **Step 3: Authenticate User 1 (Alice)**
 
@@ -161,13 +178,13 @@ This guide walks you through testing the Puppies API using Postman, including se
     *   **Body (raw, JSON):**
         ```json
         {
-            "username": "alice",
+            "email": "alice@example.com",
             "password": "password123"
         }
         ```
 *   **Postman Tests (JavaScript):**
     ```javascript
-    // In the "Tests" tab for this request
+    // In the "Scripts" tab, under "Post-response" for this request
     if (pm.response.code === 200) {
         const responseBody = pm.response.json();
         pm.collectionVariables.set("USER_1_TOKEN", responseBody.token);
@@ -177,6 +194,7 @@ This guide walks you through testing the Puppies API using Postman, including se
     }
     ```
 *   **Expected Response:** `200 OK` with a JWT. `USER_1_TOKEN` variable will be populated.
+*   **Expected Database State:** No changes.
 
 **Step 4: Authenticate User 2 (Bob)**
 
@@ -187,13 +205,13 @@ This guide walks you through testing the Puppies API using Postman, including se
     *   **Body (raw, JSON):**
         ```json
         {
-            "username": "bob",
+            "email": "bob@example.com",
             "password": "password456"
         }
         ```
 *   **Postman Tests (JavaScript):**
     ```javascript
-    // In the "Tests" tab for this request
+    // In the "Scripts" tab, under "Post-response" for this request
     if (pm.response.code === 200) {
         const responseBody = pm.response.json();
         pm.collectionVariables.set("USER_2_TOKEN", responseBody.token);
@@ -203,6 +221,7 @@ This guide walks you through testing the Puppies API using Postman, including se
     }
     ```
 *   **Expected Response:** `200 OK` with a JWT. `USER_2_TOKEN` variable will be populated.
+*   **Expected Database State:** No changes.
 
 **Step 5: User 1 (Alice) Creates Post 1**
 
@@ -214,13 +233,14 @@ This guide walks you through testing the Puppies API using Postman, including se
     *   **Body (raw, JSON):**
         ```json
         {
+            "userId": {{USER_1_ID}},
             "imageUrl": "http://example.com/puppy1.jpg",
-            "caption": "Alice's first cute puppy!"
+            "content": "Alice's first cute puppy!"
         }
         ```
 *   **Postman Tests (JavaScript):**
     ```javascript
-    // In the "Tests" tab for this request
+    // In the "Scripts" tab, under "Post-response" for this request
     if (pm.response.code === 200) {
         const responseBody = pm.response.json();
         pm.collectionVariables.set("POST_1_ID", responseBody.id);
@@ -230,6 +250,15 @@ This guide walks you through testing the Puppies API using Postman, including se
     }
     ```
 *   **Expected Response:** `200 OK` with post details. `POST_1_ID` variable will be populated.
+*   **Expected Database State:**
+    *   **`USERS` table:** No changes.
+    *   **`POSTS` table:** A new row is added for Alice's first post.
+        *   `ID`: (e.g., 1, or the value now in `POST_1_ID`)
+        *   `USER_ID`: (Value of `USER_1_ID`)
+        *   `IMAGE_URL`: "http://example.com/puppy1.jpg"
+        *   `CONTENT`: "Alice's first cute puppy!"
+        *   `CREATED_AT`: (Timestamp of creation)
+    *   **`LIKES` table:** No changes.
 
 **Step 6: User 1 (Alice) Creates Post 2**
 
@@ -241,13 +270,14 @@ This guide walks you through testing the Puppies API using Postman, including se
     *   **Body (raw, JSON):**
         ```json
         {
+            "userId": {{USER_1_ID}},
             "imageUrl": "http://example.com/puppy2.jpg",
-            "caption": "Alice's second adorable puppy!"
+            "content": "Alice's second adorable puppy!"
         }
         ```
 *   **Postman Tests (JavaScript):**
     ```javascript
-    // In the "Tests" tab for this request
+    // In the "Scripts" tab, under "Post-response" for this request
     if (pm.response.code === 200) {
         const responseBody = pm.response.json();
         pm.collectionVariables.set("POST_2_ID", responseBody.id);
@@ -257,6 +287,16 @@ This guide walks you through testing the Puppies API using Postman, including se
     }
     ```
 *   **Expected Response:** `200 OK` with post details. `POST_2_ID` variable will be populated.
+*   **Expected Database State:**
+    *   **`USERS` table:** No changes.
+    *   **`POSTS` table:** A new row is added for Alice's second post.
+        *   `ID`: (e.g., 2, or the value now in `POST_2_ID`)
+        *   `USER_ID`: (Value of `USER_1_ID`)
+        *   `IMAGE_URL`: "http://example.com/puppy2.jpg"
+        *   `CONTENT`: "Alice's second adorable puppy!"
+        *   `CREATED_AT`: (Timestamp of creation)
+        *   The table now contains two posts, both by Alice.
+    *   **`LIKES` table:** No changes.
 
 **Step 7: User 2 (Bob) Creates Post 3**
 
@@ -268,13 +308,14 @@ This guide walks you through testing the Puppies API using Postman, including se
     *   **Body (raw, JSON):**
         ```json
         {
+            "userId": {{USER_2_ID}},
             "imageUrl": "http://example.com/puppy3.jpg",
-            "caption": "Bob's playful puppy!"
+            "content": "Bob's playful puppy!"
         }
         ```
 *   **Postman Tests (JavaScript):**
     ```javascript
-    // In the "Tests" tab for this request
+    // In the "Scripts" tab, under "Post-response" for this request
     if (pm.response.code === 200) {
         const responseBody = pm.response.json();
         pm.collectionVariables.set("POST_3_ID", responseBody.id);
@@ -284,6 +325,16 @@ This guide walks you through testing the Puppies API using Postman, including se
     }
     ```
 *   **Expected Response:** `200 OK` with post details. `POST_3_ID` variable will be populated.
+*   **Expected Database State:**
+    *   **`USERS` table:** No changes.
+    *   **`POSTS` table:** A new row is added for Bob's post.
+        *   `ID`: (e.g., 3, or the value now in `POST_3_ID`)
+        *   `USER_ID`: (Value of `USER_2_ID`)
+        *   `IMAGE_URL`: "http://example.com/puppy3.jpg"
+        *   `CONTENT`: "Bob's playful puppy!"
+        *   `CREATED_AT`: (Timestamp of creation)
+        *   The table now contains three posts.
+    *   **`LIKES` table:** No changes.
 
 **Step 8: Fetch User Feed (Authenticated as Alice)**
 
@@ -293,7 +344,8 @@ This guide walks you through testing the Puppies API using Postman, including se
     *   **URL:** `{{BASE_URL}}/posts/feed`
     *   **Headers:** `Authorization`: `Bearer {{USER_1_TOKEN}}`
 *   **Expected Response:** `200 OK` with a list of posts (Post 3, then Post 2, then Post 1).
-    *   *(Optional Postman Test: You can add assertions here to check the order and content of the feed.)*
+    *   *(Optional Postman Test: You can add assertions here to check the order and content of the feed. Place them in the "Scripts" tab, under "Post-response".)*
+*   **Expected Database State:** No changes.
 
 **Step 9: Fetch Details of an Individual Post (Post 1)**
 
@@ -303,6 +355,7 @@ This guide walks you through testing the Puppies API using Postman, including se
     *   **URL:** `{{BASE_URL}}/posts/{{POST_1_ID}}`
     *   **Headers:** `Authorization`: `Bearer {{USER_1_TOKEN}}` (or any valid token, or unauthenticated if GET /api/posts/{id} is public)
 *   **Expected Response:** `200 OK` with details of Post 1.
+*   **Expected Database State:** No changes.
 
 **Step 10: User 1 (Alice) Likes Post 3 (Bob's Post)**
 
@@ -312,6 +365,12 @@ This guide walks you through testing the Puppies API using Postman, including se
     *   **URL:** `{{BASE_URL}}/posts/{{POST_3_ID}}/likes?userId={{USER_1_ID}}`
     *   **Headers:** `Authorization`: `Bearer {{USER_1_TOKEN}}`
 *   **Expected Response:** `200 OK` (empty body).
+*   **Expected Database State:**
+    *   **`USERS` table:** No changes.
+    *   **`POSTS` table:** No changes.
+    *   **`LIKES` table:** A new row is added.
+        *   `USER_ID`: (Value of `USER_1_ID`)
+        *   `POST_ID`: (Value of `POST_3_ID`)
 
 **Step 11: User 2 (Bob) Likes Post 1 (Alice's Post)**
 
@@ -321,6 +380,11 @@ This guide walks you through testing the Puppies API using Postman, including se
     *   **URL:** `{{BASE_URL}}/posts/{{POST_1_ID}}/likes?userId={{USER_2_ID}}`
     *   **Headers:** `Authorization`: `Bearer {{USER_2_TOKEN}}`
 *   **Expected Response:** `200 OK`.
+*   **Expected Database State:**
+    *   **`LIKES` table:** A new row is added.
+        *   `USER_ID`: (Value of `USER_2_ID`)
+        *   `POST_ID`: (Value of `POST_1_ID`)
+        *   The table now contains two like entries.
 
 **Step 12: User 1 (Alice) Likes Post 1 (Her Own Post)**
 
@@ -330,6 +394,11 @@ This guide walks you through testing the Puppies API using Postman, including se
     *   **URL:** `{{BASE_URL}}/posts/{{POST_1_ID}}/likes?userId={{USER_1_ID}}`
     *   **Headers:** `Authorization`: `Bearer {{USER_1_TOKEN}}`
 *   **Expected Response:** `200 OK`.
+*   **Expected Database State:**
+    *   **`LIKES` table:** A new row is added.
+        *   `USER_ID`: (Value of `USER_1_ID`)
+        *   `POST_ID`: (Value of `POST_1_ID`)
+        *   The table now contains three like entries.
 
 **Step 13: User 1 (Alice) Tries to Like Post 1 Again (Idempotency Check)**
 
@@ -339,6 +408,7 @@ This guide walks you through testing the Puppies API using Postman, including se
     *   **URL:** `{{BASE_URL}}/posts/{{POST_1_ID}}/likes?userId={{USER_1_ID}}`
     *   **Headers:** `Authorization`: `Bearer {{USER_1_TOKEN}}`
 *   **Expected Response:** `200 OK`. (The like count should not increase, no error should occur).
+*   **Expected Database State:** No changes to the `LIKES` table (assuming the like from Step 12 already exists and the operation is idempotent or handles duplicates gracefully).
 
 **Step 14: Fetch User 1's (Alice's) Profile**
 
@@ -348,6 +418,7 @@ This guide walks you through testing the Puppies API using Postman, including se
     *   **URL:** `{{BASE_URL}}/users/{{USER_1_ID}}`
     *   **Headers:** `Authorization`: `Bearer {{USER_1_TOKEN}}` (or any valid token)
 *   **Expected Response:** `200 OK` with Alice's user details.
+*   **Expected Database State:** No changes.
 
 **Step 15: Fetch Posts Made by User 1 (Alice)**
 
@@ -357,6 +428,7 @@ This guide walks you through testing the Puppies API using Postman, including se
     *   **URL:** `{{BASE_URL}}/users/{{USER_1_ID}}/posts`
     *   **Headers:** `Authorization`: `Bearer {{USER_1_TOKEN}}` (or any valid token)
 *   **Expected Response:** `200 OK` with a list of Alice's posts (Post 2, then Post 1).
+*   **Expected Database State:** No changes.
 
 **Step 16: Fetch Posts Liked by User 1 (Alice)**
 
@@ -366,6 +438,7 @@ This guide walks you through testing the Puppies API using Postman, including se
     *   **URL:** `{{BASE_URL}}/users/{{USER_1_ID}}/likes`
     *   **Headers:** `Authorization`: `Bearer {{USER_1_TOKEN}}` (or any valid token)
 *   **Expected Response:** `200 OK` with a list of posts liked by Alice (should include Post 3 and Post 1).
+*   **Expected Database State:** No changes.
 
 **Step 17: User 1 (Alice) Unlikes Post 3 (Bob's Post)**
 
@@ -375,6 +448,9 @@ This guide walks you through testing the Puppies API using Postman, including se
     *   **URL:** `{{BASE_URL}}/posts/{{POST_3_ID}}/likes?userId={{USER_1_ID}}`
     *   **Headers:** `Authorization`: `Bearer {{USER_1_TOKEN}}`
 *   **Expected Response:** `200 OK`.
+*   **Expected Database State:**
+    *   **`LIKES` table:** The row where `USER_ID` is `USER_1_ID` AND `POST_ID` is `POST_3_ID` is deleted.
+        *   The table now contains two like entries (Bob's like on Post 1, Alice's like on Post 1).
 
 **Step 18: Fetch Posts Liked by User 1 (Alice) - After Unlike**
 
@@ -384,6 +460,7 @@ This guide walks you through testing the Puppies API using Postman, including se
     *   **URL:** `{{BASE_URL}}/users/{{USER_1_ID}}/likes`
     *   **Headers:** `Authorization`: `Bearer {{USER_1_TOKEN}}`
 *   **Expected Response:** `200 OK`. Post 3 should no longer be in this list; only Post 1 should remain.
+*   **Expected Database State:** No changes.
 
 **Step 19: Show Validation Error (Optional)**
 
@@ -399,6 +476,7 @@ This guide walks you through testing the Puppies API using Postman, including se
         }
         ```
 *   **Expected Response:** `400 Bad Request` with error details.
+*   **Expected Database State:** No changes.
 
 **Step 20: Show Not Found Error (Optional)**
 
@@ -408,11 +486,13 @@ This guide walks you through testing the Puppies API using Postman, including se
     *   **URL:** `{{BASE_URL}}/posts/9999` (assuming 9999 is not a valid post ID)
     *   **Headers:** `Authorization`: `Bearer {{USER_1_TOKEN}}`
 *   **Expected Response:** `404 Not Found`.
+*   **Expected Database State:** No changes.
 
 **Step 21: Show Swagger UI (Optional)**
 
 *   **Action:** Open a web browser and navigate to `http://localhost:8080/swagger-ui.html`.
 *   **Expected:** The Swagger UI page should load, allowing interactive exploration of the API endpoints.
+*   **Expected Database State:** No changes.
 
 ---
 By following these integrated steps, you can efficiently test the Puppies API using Postman, leveraging its features for variable management and automated data extraction.

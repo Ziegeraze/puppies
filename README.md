@@ -2,6 +2,8 @@
 
 **Puppies API** is a Spring Boot RESTful service for sharing dog pictures, similar to Instagram.
 
+This README provides a quick guide for developing and testing the Puppies API.
+
 ## 🚀 Setup
 
 1. **Clone the repository**

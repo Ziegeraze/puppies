@@ -30,7 +30,7 @@
 mvn test
 ```
 
-## 📚 API Endpoints
+## 📚 API Endpoints http://localhost:8080/swagger-ui.html
 
 | Path                    | Method | Request Body   | Response Body        | Description                          |
 | ----------------------- | ------ | -------------- | -------------------- | ------------------------------------ |

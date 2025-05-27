@@ -63,7 +63,6 @@ mvn test
 ## 🚧 Next Steps (optional)
 
 * Add a **Dockerfile** + **docker-compose** to containerize the API and H2.
-* Integrate **Swagger/OpenAPI** (springdoc) for auto-generated docs.
 * Set up **CI/CD** (GitHub Actions) to build and test on each push.
 
 ---

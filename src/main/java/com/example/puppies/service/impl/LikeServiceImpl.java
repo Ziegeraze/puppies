@@ -31,7 +31,7 @@ public class LikeServiceImpl implements LikeService {
         Post post = postRepository.findById(postId)
             .orElseThrow(() -> new EntityNotFoundException("Post not found: " + postId));
 
-        // Evitamos likes duplicados (por la constraint unique en la tabla)
+        // Avoid duplicate likes (due to the unique constraint in the table)
         boolean already = likeRepository
             .findAllByUserId(userId)
             .stream()
